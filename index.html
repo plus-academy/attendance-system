@@ -550,20 +550,30 @@
         
         // 初始化時間選單
         function initTimeSelects() {
-            const hourSelects = ['morningStartHour', 'morningEndHour', 'afternoonStartHour', 'afternoonEndHour'];
-            const minSelects = ['morningStartMin', 'morningEndMin', 'afternoonStartMin', 'afternoonEndMin'];
-            
-            // 小時選單 (00-23)
-            hourSelects.forEach(id => {
+            // 上午時段：0-13 點
+            const morningHourSelects = ['morningStartHour', 'morningEndHour'];
+            morningHourSelects.forEach(id => {
                 const select = document.getElementById(id);
                 select.innerHTML = '<option value="">--</option>';
-                for (let i = 0; i < 24; i++) {
+                for (let i = 0; i <= 13; i++) {
+                    const hour = String(i).padStart(2, '0');
+                    select.innerHTML += `<option value="${hour}">${hour}</option>`;
+                }
+            });
+            
+            // 下午時段：12-22 點
+            const afternoonHourSelects = ['afternoonStartHour', 'afternoonEndHour'];
+            afternoonHourSelects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">--</option>';
+                for (let i = 12; i <= 22; i++) {
                     const hour = String(i).padStart(2, '0');
                     select.innerHTML += `<option value="${hour}">${hour}</option>`;
                 }
             });
             
             // 分鐘選單 (00, 15, 30, 45)
+            const minSelects = ['morningStartMin', 'morningEndMin', 'afternoonStartMin', 'afternoonEndMin'];
             minSelects.forEach(id => {
                 const select = document.getElementById(id);
                 select.innerHTML = '<option value="">--</option>';
