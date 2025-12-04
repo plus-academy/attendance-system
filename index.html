@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>輔導員打卡系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        
+        .date-display {
+            text-align: center;
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        input[type="text"]::placeholder {
+            color: #aaa;
+        }
+        
+        .time-display {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .time-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .current-time {
+            font-size: 36px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .mode-switch {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f5f5f5;
+            padding: 5px;
+            border-radius: 8px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+            color: #666;
+            transition: all 0.2s;
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn:hover:not(.active) {
+            color: #333;
+        }
+        
+        .time-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .time-input-group label {
+            min-width: 80px;
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+        
+        .time-select {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        .time-select select {
+            width: 70px;
+            padding: 8px;
+            font-size: 16px;
+        }
+        
+        .time-select span {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .shift-section {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .shift-section h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        input[type="date"] {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .makeup-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .makeup-tag {
+            background: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+        
+        button {
+            flex: 1;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        
+        .btn-checkin {
+            background: #4CAF50;
+        }
+        
+        .btn-checkin:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-checkout {
+            background: #2196F3;
+        }
+        
+        .btn-checkout:hover {
+            background: #0b7dda;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        button:disabled {
+            background: #bbb;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .records {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .records h2 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .record-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #4CAF50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .record-time {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .record-type {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .record-type.checkin {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .record-type.checkout {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .no-records {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .message {
+            padding: 12px 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 輔導員打卡系統</h1>
+        
+        <div class="date-display" id="dateDisplay"></div>
+        
+        <div class="mode-switch">
+            <button class="mode-btn active" id="btnModeNormal" onclick="switchMode('normal')">
+                即時打卡
+            </button>
+            <button class="mode-btn" id="btnModeMakeup" onclick="switchMode('makeup')">
+                補打卡
+            </button>
+        </div>
+        
+        <!-- 即時打卡模式 -->
+        <div id="normalMode">
+            <div class="form-group">
+                <label for="nameSelect">選擇姓名：</label>
+                <select id="nameSelect">
+                    <option value="">請選擇</option>
+                    <option value="吳雨蒨">吳雨蒨</option>
+                    <option value="朱訢瑜">朱訢瑜</option>
+                    <option value="許家瑜">許家瑜</option>
+                    <option value="陳奕璇">陳奕璇</option>
+                    <option value="趙珮錞">趙珮錞</option>
+                    <option value="許依琳">許依琳</option>
+                    <option value="郭玉涵">郭玉涵</option>
+                    <option value="曾映舫">曾映舫</option>
+                    <option value="梁碧棼">梁碧棼</option>
+                    <option value="蘇芍榛">蘇芍榛</option>
+                    <option value="王姸蓁">王姸蓁</option>
+                    <option value="張語芩">張語芩</option>
+                    <option value="蘇歆筑">蘇歆筑</option>
+                    <option value="呂瑜軒">呂瑜軒</option>
+                    <option value="黃維斌">黃維斌</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="noteInput">備註（選填）：</label>
+                <input type="text" id="noteInput" placeholder="例如：調整班表、遲到原因等">
+            </div>
+            
+            <div class="form-group">
+                <label for="workContentInput">工作內容（簽退時必填）：</label>
+                <input type="text" id="workContentInput" placeholder="例如：今天完成了哪些工作">
+            </div>
+            
+            <div class="time-display">
+                <div class="time-label">目前時間</div>
+                <div class="current-time" id="currentTime"></div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-checkin" id="btnCheckin" onclick="punch('簽到')">
+                    ✓ 簽到
+                </button>
+                <button class="btn-checkout" id="btnCheckout" onclick="punch('簽退')">
+                    ✓ 簽退
+                </button>
+            </div>
+        </div>
+        
+        <!-- 補打卡模式 -->
+        <div id="makeupMode" style="display: none;">
+            <div class="form-group">
+                <label for="makeupNameSelect">選擇姓名：</label>
+                <select id="makeupNameSelect">
+                    <option value="">請選擇</option>
+                    <option value="吳雨蒨">吳雨蒨</option>
+                    <option value="朱訢瑜">朱訢瑜</option>
+                    <option value="許家瑜">許家瑜</option>
+                    <option value="陳奕璇">陳奕璇</option>
+                    <option value="趙珮錞">趙珮錞</option>
+                    <option value="許依琳">許依琳</option>
+                    <option value="郭玉涵">郭玉涵</option>
+                    <option value="曾映舫">曾映舫</option>
+                    <option value="梁碧棼">梁碧棼</option>
+                    <option value="蘇芍榛">蘇芍榛</option>
+                    <option value="王姸蓁">王姸蓁</option>
+                    <option value="張語芩">張語芩</option>
+                    <option value="蘇歆筑">蘇歆筑</option>
+                    <option value="呂瑜軒">呂瑜軒</option>
+                    <option value="黃維斌">黃維斌</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="makeupDate">選擇日期：</label>
+                <input type="date" id="makeupDate">
+                <div class="makeup-note">只能選擇前 3 天的日期</div>
+            </div>
+            
+            <div class="shift-section">
+                <h3>上午時段</h3>
+                <div class="time-input-group">
+                    <label>上班時間：</label>
+                    <div class="time-select">
+                        <select id="morningStartHour"></select>
+                        <span>:</span>
+                        <select id="morningStartMin"></select>
+                    </div>
+                </div>
+                <div class="time-input-group">
+                    <label>下班時間：</label>
+                    <div class="time-select">
+                        <select id="morningEndHour"></select>
+                        <span>:</span>
+                        <select id="morningEndMin"></select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="shift-section">
+                <h3>下午時段</h3>
+                <div class="time-input-group">
+                    <label>上班時間：</label>
+                    <div class="time-select">
+                        <select id="afternoonStartHour"></select>
+                        <span>:</span>
+                        <select id="afternoonStartMin"></select>
+                    </div>
+                </div>
+                <div class="time-input-group">
+                    <label>下班時間：</label>
+                    <div class="time-select">
+                        <select id="afternoonEndHour"></select>
+                        <span>:</span>
+                        <select id="afternoonEndMin"></select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="makeupNote">備註（必填）：</label>
+                <input type="text" id="makeupNote" placeholder="請填寫當日進行的活動" required>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-checkin" onclick="submitMakeup()" style="flex: 1;">
+                    確認補打卡
+                </button>
+            </div>
+        </div>
+        
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // Google Apps Script 網址
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfQ5TzRX90ZtnoadlkoY3-G9770hRRUSKUMQbF2JbhE0r8EzfMrt1Bo3GaVDYtJwzykw/exec';
+        
+        // 注意：Google Sheets 需要以下欄位
+        // 打卡記錄表格式：姓名 | 日期 | 時間 | 類型 | IP位址 | 備註 | 工作內容
+        
+        // 模式切換
+        function switchMode(mode) {
+            const normalMode = document.getElementById('normalMode');
+            const makeupMode = document.getElementById('makeupMode');
+            const btnNormal = document.getElementById('btnModeNormal');
+            const btnMakeup = document.getElementById('btnModeMakeup');
+            
+            if (mode === 'normal') {
+                normalMode.style.display = 'block';
+                makeupMode.style.display = 'none';
+                btnNormal.classList.add('active');
+                btnMakeup.classList.remove('active');
+            } else {
+                normalMode.style.display = 'none';
+                makeupMode.style.display = 'block';
+                btnNormal.classList.remove('active');
+                btnMakeup.classList.add('active');
+                initMakeupMode();
+            }
+        }
+        
+        // 初始化補打卡模式
+        function initMakeupMode() {
+            // 初始化時間下拉選單
+            initTimeSelects();
+            
+            // 設定日期限制（只能選前3天）
+            const dateInput = document.getElementById('makeupDate');
+            const today = new Date();
+            const maxDate = new Date(today);
+            maxDate.setDate(maxDate.getDate() - 1); // 昨天
+            const minDate = new Date(today);
+            minDate.setDate(minDate.getDate() - 3); // 前3天
+            
+            dateInput.max = maxDate.toISOString().split('T')[0];
+            dateInput.min = minDate.toISOString().split('T')[0];
+        }
+        
+        // 初始化時間選單
+        function initTimeSelects() {
+            const hourSelects = ['morningStartHour', 'morningEndHour', 'afternoonStartHour', 'afternoonEndHour'];
+            const minSelects = ['morningStartMin', 'morningEndMin', 'afternoonStartMin', 'afternoonEndMin'];
+            
+            // 小時選單 (00-23)
+            hourSelects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">--</option>';
+                for (let i = 0; i < 24; i++) {
+                    const hour = String(i).padStart(2, '0');
+                    select.innerHTML += `<option value="${hour}">${hour}</option>`;
+                }
+            });
+            
+            // 分鐘選單 (00, 15, 30, 45)
+            minSelects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">--</option>';
+                ['00', '15', '30', '45'].forEach(min => {
+                    select.innerHTML += `<option value="${min}">${min}</option>`;
+                });
+            });
+        }
+        
+        // 補打卡提交
+        async function submitMakeup() {
+            const name = document.getElementById('makeupNameSelect').value;
+            const date = document.getElementById('makeupDate').value;
+            const note = document.getElementById('makeupNote').value.trim();
+            
+            // 驗證必填欄位
+            if (!name) {
+                showMessage('請選擇姓名！', 'error');
+                return;
+            }
+            if (!date) {
+                showMessage('請選擇日期！', 'error');
+                return;
+            }
+            if (!note) {
+                showMessage('請填寫備註（當日進行的活動）！', 'error');
+                return;
+            }
+            
+            // 取得時間
+            const morningStart = getTimeValue('morningStartHour', 'morningStartMin');
+            const morningEnd = getTimeValue('morningEndHour', 'morningEndMin');
+            const afternoonStart = getTimeValue('afternoonStartHour', 'afternoonStartMin');
+            const afternoonEnd = getTimeValue('afternoonEndHour', 'afternoonEndMin');
+            
+            // 檢查是否至少填了一個時段
+            if (!morningStart && !afternoonStart) {
+                showMessage('請至少填寫一個時段的時間！', 'error');
+                return;
+            }
+            
+            // 準備要送出的記錄
+            const records = [];
+            const noteWithTag = note + '（補登）';
+            const formattedDate = new Date(date).toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).replace(/\//g, '/');
+            
+            // 上午時段
+            if (morningStart && morningEnd) {
+                records.push(
+                    { name, date: formattedDate, time: morningStart + ':00', type: '簽到', note: noteWithTag, workContent: '' },
+                    { name, date: formattedDate, time: morningEnd + ':00', type: '簽退', note: noteWithTag, workContent: '' }
+                );
+            }
+            
+            // 下午時段
+            if (afternoonStart && afternoonEnd) {
+                records.push(
+                    { name, date: formattedDate, time: afternoonStart + ':00', type: '簽到', note: noteWithTag, workContent: '' },
+                    { name, date: formattedDate, time: afternoonEnd + ':00', type: '簽退', note: noteWithTag, workContent: '' }
+                );
+            }
+            
+            // 送出所有記錄
+            try {
+                for (const record of records) {
+                    // 送到 Google Sheets
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(record)
+                    });
+                }
+                
+                showMessage(`補打卡成功！已記錄 ${records.length} 筆打卡資料`, 'success');
+                
+                // 清空表單
+                document.getElementById('makeupNameSelect').value = '';
+                document.getElementById('makeupDate').value = '';
+                document.getElementById('makeupNote').value = '';
+                ['morningStartHour', 'morningStartMin', 'morningEndHour', 'morningEndMin',
+                 'afternoonStartHour', 'afternoonStartMin', 'afternoonEndHour', 'afternoonEndMin'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                
+            } catch (error) {
+                showMessage('補打卡失敗，請稍後再試', 'error');
+                console.error('Error:', error);
+            }
+        }
+        
+        // 取得時間值
+        function getTimeValue(hourId, minId) {
+            const hour = document.getElementById(hourId).value;
+            const min = document.getElementById(minId).value;
+            if (hour && min) {
+                return `${hour}:${min}`;
+            }
+            return null;
+        }
+        
+        // 更新當前時間
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('zh-TW', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false 
+            });
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+        
+        // 更新日期顯示
+        function updateDate() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'long'
+            });
+            document.getElementById('dateDisplay').textContent = dateStr;
+        }
+        
+        // 顯示訊息
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 3000);
+        }
+        
+        // 打卡功能
+        async function punch(type) {
+            const name = document.getElementById('nameSelect').value;
+            const note = document.getElementById('noteInput').value.trim();
+            const workContent = document.getElementById('workContentInput').value.trim();
+            
+            if (!name) {
+                showMessage('請先選擇姓名！', 'error');
+                return;
+            }
+            
+            // 簽退時工作內容必填
+            if (type === '簽退' && !workContent) {
+                showMessage('簽退時請填寫工作內容！', 'error');
+                return;
+            }
+            
+            const now = new Date();
+            const date = now.toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).replace(/\//g, '/');
+            
+            const time = now.toLocaleTimeString('zh-TW', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            
+            const data = {
+                name: name,
+                date: date,
+                time: time,
+                type: type,
+                note: note,
+                workContent: workContent
+            };
+            
+            // 禁用按鈕
+            document.getElementById('btnCheckin').disabled = true;
+            document.getElementById('btnCheckout').disabled = true;
+            
+            try {
+                // 傳送到 Google Sheets
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                showMessage(`${type}成功！時間：${time}`, 'success');
+                
+                // 清空備註和工作內容欄位
+                document.getElementById('noteInput').value = '';
+                document.getElementById('workContentInput').value = '';
+                
+            } catch (error) {
+                showMessage('打卡失敗，請稍後再試', 'error');
+                console.error('Error:', error);
+            } finally {
+                // 重新啟用按鈕
+                document.getElementById('btnCheckin').disabled = false;
+                document.getElementById('btnCheckout').disabled = false;
+            }
+        }
+        
+        // 初始化
+        updateDate();
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
