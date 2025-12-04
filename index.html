@@ -493,7 +493,7 @@
 
     <script>
         // Google Apps Script 網址
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfQ5TzRX90ZtnoadlkoY3-G9770hRRUSKUMQbF2JbhE0r8EzfMrt1Bo3GaVDYtJwzykw/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyE2z6MYINCqIfyJUzZfFxMNyGdpEVfzaoxHRkuFqRBN3x83iPj7fvRUnqKZAeH3lzrcg/exec';
         
         // 注意：Google Sheets 需要以下欄位
         // 打卡記錄表格式：姓名 | 日期 | 時間 | 類型 | IP位址 | 備註 | 工作內容
@@ -504,20 +504,20 @@
                 const response = await fetch(`${SCRIPT_URL}?action=getStaffList`);
                 const result = await response.json();
                 
-                if (result.success && result.staffList.length > 0) {
+                if (result.success && result.staffList && result.staffList.length > 0) {
                     const optionsHtml = '<option value="">請選擇</option>' + 
                         result.staffList.map(name => `<option value="${name}">${name}</option>`).join('');
                     
                     document.getElementById('nameSelect').innerHTML = optionsHtml;
                     document.getElementById('makeupNameSelect').innerHTML = optionsHtml;
                 } else {
-                    throw new Error('無法載入人員名單');
+                    throw new Error(result.message || '無法載入人員名單');
                 }
             } catch (error) {
                 console.error('載入名單失敗:', error);
-                // 顯示錯誤但允許手動輸入
                 document.getElementById('nameSelect').innerHTML = '<option value="">載入失敗，請重新整理</option>';
                 document.getElementById('makeupNameSelect').innerHTML = '<option value="">載入失敗，請重新整理</option>';
+                showMessage('載入名單失敗：' + error.message, 'error');
             }
         }
         
@@ -630,7 +630,7 @@
                     
                     const result = await response.json();
                     if (!result.success) {
-                        throw new Error(result.message || '打卡失敗');
+                        throw new Error(result.message || '補打卡失敗');
                     }
                 }
                 
@@ -686,7 +686,7 @@
             }, 3000);
         }
         
-        // 打卡功能（改良版：移除 no-cors，加入錯誤處理和防呆）
+        // 打卡功能
         async function punch(type) {
             const name = document.getElementById('nameSelect').value;
             const note = document.getElementById('noteInput').value.trim();
@@ -705,16 +705,6 @@
                 showMessage('簽退時請填寫工作內容！', 'error');
                 document.getElementById('workContentInput').classList.add('error-input');
                 document.getElementById('workContentInput').focus();
-                return;
-            }
-            
-            // 防呆：檢查是否剛剛才打過卡（5秒內）
-            const lastPunchKey = `lastPunch_${name}_${type}`;
-            const lastPunchTime = localStorage.getItem(lastPunchKey);
-            const now = Date.now();
-            
-            if (lastPunchTime && (now - parseInt(lastPunchTime)) < 5000) {
-                showMessage('請勿重複打卡！', 'error');
                 return;
             }
             
@@ -750,7 +740,7 @@
             btnCheckout.classList.add('loading');
             
             try {
-                // 傳送到 Google Sheets（移除 no-cors）
+                // 傳送到 Google Sheets
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: {
@@ -764,9 +754,6 @@
                 if (result.success) {
                     showMessage(`${type}成功！時間：${time}`, 'success');
                     
-                    // 記錄打卡時間（防呆用）
-                    localStorage.setItem(lastPunchKey, now.toString());
-                    
                     // 清空欄位
                     document.getElementById('noteInput').value = '';
                     document.getElementById('workContentInput').value = '';
@@ -778,11 +765,13 @@
                 showMessage('打卡失敗：' + error.message, 'error');
                 console.error('Error:', error);
             } finally {
-                // 重新啟用按鈕並移除 loading
-                btnCheckin.disabled = false;
-                btnCheckout.disabled = false;
-                btnCheckin.classList.remove('loading');
-                btnCheckout.classList.remove('loading');
+                // 移除 loading 並重新啟用按鈕
+                setTimeout(() => {
+                    btnCheckin.disabled = false;
+                    btnCheckout.disabled = false;
+                    btnCheckin.classList.remove('loading');
+                    btnCheckout.classList.remove('loading');
+                }, 500);
             }
         }
         
