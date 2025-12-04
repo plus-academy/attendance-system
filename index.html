@@ -456,11 +456,15 @@
                 <h3>上午時段</h3>
                 <div class="time-input-group">
                     <label>上班時間：</label>
-                    <input type="time" id="morningStartTime" min="08:00" max="13:00" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <select id="morningStartHour"></select>
+                    <span>:</span>
+                    <select id="morningStartMinute"></select>
                 </div>
                 <div class="time-input-group">
                     <label>下班時間：</label>
-                    <input type="time" id="morningEndTime" min="08:00" max="13:00" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <select id="morningEndHour"></select>
+                    <span>:</span>
+                    <select id="morningEndMinute"></select>
                 </div>
             </div>
             
@@ -468,11 +472,15 @@
                 <h3>下午時段</h3>
                 <div class="time-input-group">
                     <label>上班時間：</label>
-                    <input type="time" id="afternoonStartTime" min="12:00" max="22:00" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <select id="afternoonStartHour"></select>
+                    <span>:</span>
+                    <select id="afternoonStartMinute"></select>
                 </div>
                 <div class="time-input-group">
                     <label>下班時間：</label>
-                    <input type="time" id="afternoonEndTime" min="12:00" max="22:00" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <select id="afternoonEndHour"></select>
+                    <span>:</span>
+                    <select id="afternoonEndMinute"></select>
                 </div>
             </div>
             
@@ -554,6 +562,45 @@
             
             dateInput.max = maxDate.toISOString().split('T')[0];
             dateInput.min = minDate.toISOString().split('T')[0];
+            
+            // 初始化時間選單
+            initTimeSelects();
+        }
+        
+        // 初始化時間選單
+        function initTimeSelects() {
+            // 上午時段：8-13 點
+            const morningHours = Array.from({length: 6}, (_, i) => i + 8); // 8, 9, 10, 11, 12, 13
+            
+            // 下午時段：12-22 點
+            const afternoonHours = Array.from({length: 11}, (_, i) => i + 12); // 12, 13, ..., 22
+            
+            // 分鐘選項
+            const minutes = ['00', '15', '30', '45'];
+            
+            // 填充上午時段
+            fillSelect('morningStartHour', morningHours);
+            fillSelect('morningStartMinute', minutes);
+            fillSelect('morningEndHour', morningHours);
+            fillSelect('morningEndMinute', minutes);
+            
+            // 填充下午時段
+            fillSelect('afternoonStartHour', afternoonHours);
+            fillSelect('afternoonStartMinute', minutes);
+            fillSelect('afternoonEndHour', afternoonHours);
+            fillSelect('afternoonEndMinute', minutes);
+        }
+        
+        // 填充下拉選單
+        function fillSelect(id, options) {
+            const select = document.getElementById(id);
+            select.innerHTML = '<option value="">--</option>';
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                select.appendChild(option);
+            });
         }
         
         // 補打卡提交
@@ -580,11 +627,11 @@
             // 移除錯誤樣式
             document.getElementById('makeupNote').classList.remove('error-input');
             
-            // 取得時間
-            const morningStart = document.getElementById('morningStartTime').value;
-            const morningEnd = document.getElementById('morningEndTime').value;
-            const afternoonStart = document.getElementById('afternoonStartTime').value;
-            const afternoonEnd = document.getElementById('afternoonEndTime').value;
+            // 取得時間（從 select 選單）
+            const morningStart = getTimeValue('morningStartHour', 'morningStartMinute');
+            const morningEnd = getTimeValue('morningEndHour', 'morningEndMinute');
+            const afternoonStart = getTimeValue('afternoonStartHour', 'afternoonStartMinute');
+            const afternoonEnd = getTimeValue('afternoonEndHour', 'afternoonEndMinute');
             
             // 檢查是否至少填了一個時段
             if (!morningStart && !afternoonStart) {
@@ -604,16 +651,16 @@
             // 上午時段
             if (morningStart && morningEnd) {
                 records.push(
-                    { name, date: formattedDate, time: morningStart + ':00', type: '簽到', note: noteWithTag, workContent: '' },
-                    { name, date: formattedDate, time: morningEnd + ':00', type: '簽退', note: noteWithTag, workContent: '' }
+                    { name, date: formattedDate, time: morningStart, type: '簽到', note: noteWithTag, workContent: '' },
+                    { name, date: formattedDate, time: morningEnd, type: '簽退', note: noteWithTag, workContent: '' }
                 );
             }
             
             // 下午時段
             if (afternoonStart && afternoonEnd) {
                 records.push(
-                    { name, date: formattedDate, time: afternoonStart + ':00', type: '簽到', note: noteWithTag, workContent: '' },
-                    { name, date: formattedDate, time: afternoonEnd + ':00', type: '簽退', note: noteWithTag, workContent: '' }
+                    { name, date: formattedDate, time: afternoonStart, type: '簽到', note: noteWithTag, workContent: '' },
+                    { name, date: formattedDate, time: afternoonEnd, type: '簽退', note: noteWithTag, workContent: '' }
                 );
             }
             
@@ -638,15 +685,29 @@
                 document.getElementById('makeupNameSelect').value = '';
                 document.getElementById('makeupDate').value = '';
                 document.getElementById('makeupNote').value = '';
-                document.getElementById('morningStartTime').value = '';
-                document.getElementById('morningEndTime').value = '';
-                document.getElementById('afternoonStartTime').value = '';
-                document.getElementById('afternoonEndTime').value = '';
+                document.getElementById('morningStartHour').value = '';
+                document.getElementById('morningStartMinute').value = '';
+                document.getElementById('morningEndHour').value = '';
+                document.getElementById('morningEndMinute').value = '';
+                document.getElementById('afternoonStartHour').value = '';
+                document.getElementById('afternoonStartMinute').value = '';
+                document.getElementById('afternoonEndHour').value = '';
+                document.getElementById('afternoonEndMinute').value = '';
                 
             } catch (error) {
                 showMessage('補打卡失敗：' + error.message, 'error');
                 console.error('Error:', error);
             }
+        }
+        
+        // 從選單取得時間值
+        function getTimeValue(hourId, minuteId) {
+            const hour = document.getElementById(hourId).value;
+            const minute = document.getElementById(minuteId).value;
+            
+            if (!hour || !minute) return null;
+            
+            return `${hour.padStart(2, '0')}:${minute}:00`;
         }
         
         // 更新當前時間
