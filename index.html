@@ -449,18 +449,18 @@
             <div class="form-group">
                 <label for="makeupDate">選擇日期：</label>
                 <input type="date" id="makeupDate">
-                <div class="makeup-note">只能選擇前 3 天的日期</div>
+                <div class="makeup-note">只能選擇前 7 天的日期</div>
             </div>
             
             <div class="shift-section">
                 <h3>上午時段</h3>
                 <div class="time-input-group">
                     <label>上班時間：</label>
-                    <input type="time" id="morningStartTime" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <input type="time" id="morningStartTime" min="08:00" max="13:00" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
                 <div class="time-input-group">
                     <label>下班時間：</label>
-                    <input type="time" id="morningEndTime" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <input type="time" id="morningEndTime" min="08:00" max="13:00" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
             </div>
             
@@ -468,11 +468,11 @@
                 <h3>下午時段</h3>
                 <div class="time-input-group">
                     <label>上班時間：</label>
-                    <input type="time" id="afternoonStartTime" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <input type="time" id="afternoonStartTime" min="12:00" max="22:00" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
                 <div class="time-input-group">
                     <label>下班時間：</label>
-                    <input type="time" id="afternoonEndTime" style="width: 140px; padding: 8px; font-size: 16px;">
+                    <input type="time" id="afternoonEndTime" min="12:00" max="22:00" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
             </div>
             
@@ -544,13 +544,13 @@
         
         // 初始化補打卡模式
         function initMakeupMode() {
-            // 設定日期限制（只能選前3天）
+            // 設定日期限制（只能選前7天）
             const dateInput = document.getElementById('makeupDate');
             const today = new Date();
             const maxDate = new Date(today);
             maxDate.setDate(maxDate.getDate() - 1); // 昨天
             const minDate = new Date(today);
-            minDate.setDate(minDate.getDate() - 3); // 前3天
+            minDate.setDate(minDate.getDate() - 7); // 前7天
             
             dateInput.max = maxDate.toISOString().split('T')[0];
             dateInput.min = minDate.toISOString().split('T')[0];
