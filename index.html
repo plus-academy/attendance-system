@@ -239,6 +239,36 @@
             cursor: pointer;
             transition: all 0.2s;
             color: white;
+            position: relative;
+        }
+        
+        button.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        button.loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spinner 0.6s linear infinite;
+        }
+        
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-input {
+            border-color: #dc3545 !important;
+            background: #fff5f5 !important;
         }
         
         .btn-checkin {
@@ -374,22 +404,7 @@
             <div class="form-group">
                 <label for="nameSelect">選擇姓名：</label>
                 <select id="nameSelect">
-                    <option value="">請選擇</option>
-                    <option value="吳雨蒨">吳雨蒨</option>
-                    <option value="朱訢瑜">朱訢瑜</option>
-                    <option value="許家瑜">許家瑜</option>
-                    <option value="陳奕璇">陳奕璇</option>
-                    <option value="趙珮錞">趙珮錞</option>
-                    <option value="許依琳">許依琳</option>
-                    <option value="郭玉涵">郭玉涵</option>
-                    <option value="曾映舫">曾映舫</option>
-                    <option value="梁碧棼">梁碧棼</option>
-                    <option value="蘇芍榛">蘇芍榛</option>
-                    <option value="王姸蓁">王姸蓁</option>
-                    <option value="張語芩">張語芩</option>
-                    <option value="蘇歆筑">蘇歆筑</option>
-                    <option value="呂瑜軒">呂瑜軒</option>
-                    <option value="黃維斌">黃維斌</option>
+                    <option value="">載入中...</option>
                 </select>
             </div>
             
@@ -427,22 +442,7 @@
             <div class="form-group">
                 <label for="makeupNameSelect">選擇姓名：</label>
                 <select id="makeupNameSelect">
-                    <option value="">請選擇</option>
-                    <option value="吳雨蒨">吳雨蒨</option>
-                    <option value="朱訢瑜">朱訢瑜</option>
-                    <option value="許家瑜">許家瑜</option>
-                    <option value="陳奕璇">陳奕璇</option>
-                    <option value="趙珮錞">趙珮錞</option>
-                    <option value="許依琳">許依琳</option>
-                    <option value="郭玉涵">郭玉涵</option>
-                    <option value="曾映舫">曾映舫</option>
-                    <option value="梁碧棼">梁碧棼</option>
-                    <option value="蘇芍榛">蘇芍榛</option>
-                    <option value="王姸蓁">王姸蓁</option>
-                    <option value="張語芩">張語芩</option>
-                    <option value="蘇歆筑">蘇歆筑</option>
-                    <option value="呂瑜軒">呂瑜軒</option>
-                    <option value="黃維斌">黃維斌</option>
+                    <option value="">載入中...</option>
                 </select>
             </div>
             
@@ -456,19 +456,11 @@
                 <h3>上午時段</h3>
                 <div class="time-input-group">
                     <label>上班時間：</label>
-                    <div class="time-select">
-                        <select id="morningStartHour"></select>
-                        <span>:</span>
-                        <select id="morningStartMin"></select>
-                    </div>
+                    <input type="time" id="morningStartTime" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
                 <div class="time-input-group">
                     <label>下班時間：</label>
-                    <div class="time-select">
-                        <select id="morningEndHour"></select>
-                        <span>:</span>
-                        <select id="morningEndMin"></select>
-                    </div>
+                    <input type="time" id="morningEndTime" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
             </div>
             
@@ -476,19 +468,11 @@
                 <h3>下午時段</h3>
                 <div class="time-input-group">
                     <label>上班時間：</label>
-                    <div class="time-select">
-                        <select id="afternoonStartHour"></select>
-                        <span>:</span>
-                        <select id="afternoonStartMin"></select>
-                    </div>
+                    <input type="time" id="afternoonStartTime" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
                 <div class="time-input-group">
                     <label>下班時間：</label>
-                    <div class="time-select">
-                        <select id="afternoonEndHour"></select>
-                        <span>:</span>
-                        <select id="afternoonEndMin"></select>
-                    </div>
+                    <input type="time" id="afternoonEndTime" style="width: 140px; padding: 8px; font-size: 16px;">
                 </div>
             </div>
             
@@ -514,6 +498,29 @@
         // 注意：Google Sheets 需要以下欄位
         // 打卡記錄表格式：姓名 | 日期 | 時間 | 類型 | IP位址 | 備註 | 工作內容
         
+        // 載入人員名單
+        async function loadStaffList() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getStaffList`);
+                const result = await response.json();
+                
+                if (result.success && result.staffList.length > 0) {
+                    const optionsHtml = '<option value="">請選擇</option>' + 
+                        result.staffList.map(name => `<option value="${name}">${name}</option>`).join('');
+                    
+                    document.getElementById('nameSelect').innerHTML = optionsHtml;
+                    document.getElementById('makeupNameSelect').innerHTML = optionsHtml;
+                } else {
+                    throw new Error('無法載入人員名單');
+                }
+            } catch (error) {
+                console.error('載入名單失敗:', error);
+                // 顯示錯誤但允許手動輸入
+                document.getElementById('nameSelect').innerHTML = '<option value="">載入失敗，請重新整理</option>';
+                document.getElementById('makeupNameSelect').innerHTML = '<option value="">載入失敗，請重新整理</option>';
+            }
+        }
+        
         // 模式切換
         function switchMode(mode) {
             const normalMode = document.getElementById('normalMode');
@@ -537,9 +544,6 @@
         
         // 初始化補打卡模式
         function initMakeupMode() {
-            // 初始化時間下拉選單
-            initTimeSelects();
-            
             // 設定日期限制（只能選前3天）
             const dateInput = document.getElementById('makeupDate');
             const today = new Date();
@@ -550,41 +554,6 @@
             
             dateInput.max = maxDate.toISOString().split('T')[0];
             dateInput.min = minDate.toISOString().split('T')[0];
-        }
-        
-        // 初始化時間選單
-        function initTimeSelects() {
-            // 上午時段：0-13 點
-            const morningHourSelects = ['morningStartHour', 'morningEndHour'];
-            morningHourSelects.forEach(id => {
-                const select = document.getElementById(id);
-                select.innerHTML = '<option value="">--</option>';
-                for (let i = 0; i <= 13; i++) {
-                    const hour = String(i).padStart(2, '0');
-                    select.innerHTML += `<option value="${hour}">${hour}</option>`;
-                }
-            });
-            
-            // 下午時段：12-22 點
-            const afternoonHourSelects = ['afternoonStartHour', 'afternoonEndHour'];
-            afternoonHourSelects.forEach(id => {
-                const select = document.getElementById(id);
-                select.innerHTML = '<option value="">--</option>';
-                for (let i = 12; i <= 22; i++) {
-                    const hour = String(i).padStart(2, '0');
-                    select.innerHTML += `<option value="${hour}">${hour}</option>`;
-                }
-            });
-            
-            // 分鐘選單 (00, 15, 30, 45)
-            const minSelects = ['morningStartMin', 'morningEndMin', 'afternoonStartMin', 'afternoonEndMin'];
-            minSelects.forEach(id => {
-                const select = document.getElementById(id);
-                select.innerHTML = '<option value="">--</option>';
-                ['00', '15', '30', '45'].forEach(min => {
-                    select.innerHTML += `<option value="${min}">${min}</option>`;
-                });
-            });
         }
         
         // 補打卡提交
@@ -604,14 +573,18 @@
             }
             if (!note) {
                 showMessage('請填寫備註（當日進行的活動）！', 'error');
+                document.getElementById('makeupNote').classList.add('error-input');
                 return;
             }
             
+            // 移除錯誤樣式
+            document.getElementById('makeupNote').classList.remove('error-input');
+            
             // 取得時間
-            const morningStart = getTimeValue('morningStartHour', 'morningStartMin');
-            const morningEnd = getTimeValue('morningEndHour', 'morningEndMin');
-            const afternoonStart = getTimeValue('afternoonStartHour', 'afternoonStartMin');
-            const afternoonEnd = getTimeValue('afternoonEndHour', 'afternoonEndMin');
+            const morningStart = document.getElementById('morningStartTime').value;
+            const morningEnd = document.getElementById('morningEndTime').value;
+            const afternoonStart = document.getElementById('afternoonStartTime').value;
+            const afternoonEnd = document.getElementById('afternoonEndTime').value;
             
             // 檢查是否至少填了一個時段
             if (!morningStart && !afternoonStart) {
@@ -647,15 +620,18 @@
             // 送出所有記錄
             try {
                 for (const record of records) {
-                    // 送到 Google Sheets
-                    await fetch(SCRIPT_URL, {
+                    const response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        mode: 'no-cors',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify(record)
                     });
+                    
+                    const result = await response.json();
+                    if (!result.success) {
+                        throw new Error(result.message || '打卡失敗');
+                    }
                 }
                 
                 showMessage(`補打卡成功！已記錄 ${records.length} 筆打卡資料`, 'success');
@@ -664,25 +640,15 @@
                 document.getElementById('makeupNameSelect').value = '';
                 document.getElementById('makeupDate').value = '';
                 document.getElementById('makeupNote').value = '';
-                ['morningStartHour', 'morningStartMin', 'morningEndHour', 'morningEndMin',
-                 'afternoonStartHour', 'afternoonStartMin', 'afternoonEndHour', 'afternoonEndMin'].forEach(id => {
-                    document.getElementById(id).value = '';
-                });
+                document.getElementById('morningStartTime').value = '';
+                document.getElementById('morningEndTime').value = '';
+                document.getElementById('afternoonStartTime').value = '';
+                document.getElementById('afternoonEndTime').value = '';
                 
             } catch (error) {
-                showMessage('補打卡失敗，請稍後再試', 'error');
+                showMessage('補打卡失敗：' + error.message, 'error');
                 console.error('Error:', error);
             }
-        }
-        
-        // 取得時間值
-        function getTimeValue(hourId, minId) {
-            const hour = document.getElementById(hourId).value;
-            const min = document.getElementById(minId).value;
-            if (hour && min) {
-                return `${hour}:${min}`;
-            }
-            return null;
         }
         
         // 更新當前時間
@@ -720,11 +686,14 @@
             }, 3000);
         }
         
-        // 打卡功能
+        // 打卡功能（改良版：移除 no-cors，加入錯誤處理和防呆）
         async function punch(type) {
             const name = document.getElementById('nameSelect').value;
             const note = document.getElementById('noteInput').value.trim();
             const workContent = document.getElementById('workContentInput').value.trim();
+            
+            // 移除錯誤樣式
+            document.getElementById('workContentInput').classList.remove('error-input');
             
             if (!name) {
                 showMessage('請先選擇姓名！', 'error');
@@ -734,17 +703,29 @@
             // 簽退時工作內容必填
             if (type === '簽退' && !workContent) {
                 showMessage('簽退時請填寫工作內容！', 'error');
+                document.getElementById('workContentInput').classList.add('error-input');
+                document.getElementById('workContentInput').focus();
                 return;
             }
             
-            const now = new Date();
-            const date = now.toLocaleDateString('zh-TW', {
+            // 防呆：檢查是否剛剛才打過卡（5秒內）
+            const lastPunchKey = `lastPunch_${name}_${type}`;
+            const lastPunchTime = localStorage.getItem(lastPunchKey);
+            const now = Date.now();
+            
+            if (lastPunchTime && (now - parseInt(lastPunchTime)) < 5000) {
+                showMessage('請勿重複打卡！', 'error');
+                return;
+            }
+            
+            const currentDate = new Date();
+            const date = currentDate.toLocaleDateString('zh-TW', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit'
             }).replace(/\//g, '/');
             
-            const time = now.toLocaleTimeString('zh-TW', {
+            const time = currentDate.toLocaleTimeString('zh-TW', {
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit',
@@ -760,34 +741,48 @@
                 workContent: workContent
             };
             
-            // 禁用按鈕
-            document.getElementById('btnCheckin').disabled = true;
-            document.getElementById('btnCheckout').disabled = true;
+            // 按鈕加入 loading 狀態
+            const btnCheckin = document.getElementById('btnCheckin');
+            const btnCheckout = document.getElementById('btnCheckout');
+            btnCheckin.disabled = true;
+            btnCheckout.disabled = true;
+            btnCheckin.classList.add('loading');
+            btnCheckout.classList.add('loading');
             
             try {
-                // 傳送到 Google Sheets
-                fetch(SCRIPT_URL, {
+                // 傳送到 Google Sheets（移除 no-cors）
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(data)
                 });
                 
-                showMessage(`${type}成功！時間：${time}`, 'success');
+                const result = await response.json();
                 
-                // 清空備註和工作內容欄位
-                document.getElementById('noteInput').value = '';
-                document.getElementById('workContentInput').value = '';
+                if (result.success) {
+                    showMessage(`${type}成功！時間：${time}`, 'success');
+                    
+                    // 記錄打卡時間（防呆用）
+                    localStorage.setItem(lastPunchKey, now.toString());
+                    
+                    // 清空欄位
+                    document.getElementById('noteInput').value = '';
+                    document.getElementById('workContentInput').value = '';
+                } else {
+                    throw new Error(result.message || '打卡失敗');
+                }
                 
             } catch (error) {
-                showMessage('打卡失敗，請稍後再試', 'error');
+                showMessage('打卡失敗：' + error.message, 'error');
                 console.error('Error:', error);
             } finally {
-                // 重新啟用按鈕
-                document.getElementById('btnCheckin').disabled = false;
-                document.getElementById('btnCheckout').disabled = false;
+                // 重新啟用按鈕並移除 loading
+                btnCheckin.disabled = false;
+                btnCheckout.disabled = false;
+                btnCheckin.classList.remove('loading');
+                btnCheckout.classList.remove('loading');
             }
         }
         
@@ -795,6 +790,9 @@
         updateDate();
         updateTime();
         setInterval(updateTime, 1000);
+        
+        // 載入人員名單
+        loadStaffList();
     </script>
 </body>
 </html>
