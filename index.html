@@ -569,8 +569,8 @@
         
         // 初始化時間選單
         function initTimeSelects() {
-            // 上午時段：8-13 點
-            const morningHours = Array.from({length: 6}, (_, i) => i + 8); // 8, 9, 10, 11, 12, 13
+            // 上午時段：7-13 點
+            const morningHours = Array.from({length: 7}, (_, i) => i + 7); // 7, 8, 9, 10, 11, 12, 13
             
             // 下午時段：12-22 點
             const afternoonHours = Array.from({length: 11}, (_, i) => i + 12); // 12, 13, ..., 22
@@ -639,6 +639,12 @@
                 return;
             }
             
+            // 禁用按鈕，防止重複提交
+            const submitBtn = document.querySelector('#makeupMode button[onclick="submitMakeup()"]');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = '提交中，請稍候...';
+            
             // 準備要送出的記錄
             const records = [];
             const noteWithTag = note + '（補登）';
@@ -697,6 +703,11 @@
             } catch (error) {
                 showMessage('補打卡失敗：' + error.message, 'error');
                 console.error('Error:', error);
+            } finally {
+                // 恢復按鈕狀態
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = '✓ 提交補打卡';
             }
         }
         
